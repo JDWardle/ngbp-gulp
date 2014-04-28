@@ -1,0 +1,10 @@
+{
+  "name": "test-gulp",
+  "version": "0.0.0",
+  "devDependencies": {
+    "gulp": "^3.6.2",
+    "gulp-clean": "^0.2.4",
+    "gulp-jshint": "^1.5.5",
+    "gulp-coffeelint": "^0.3.2"
+  }
+}

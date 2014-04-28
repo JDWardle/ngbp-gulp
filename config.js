@@ -8,6 +8,9 @@ module.exports = {
         js: ['src/**/*.js', '!src/**/*.spec.js', '!src/assets/**/*.js'],
         jsTest: ['src/**/*.spec.js'],
 
+        cs: ['src/**/*.coffee', '!src/**/*.spec.coffee', '!src/assets/**/*.cofeee'],
+        csTest: ['src/**/*.spec.coffee'],
+
         appTpl: ['src/app/**/*.tpl.html'],
         commonTpl: ['src/common/**/*.tpl.html'],
 
