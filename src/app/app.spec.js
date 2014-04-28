@@ -1,20 +1,17 @@
-describe('izops module', function () {
-    beforeEach(module('izops'));
+describe( 'AppCtrl', function() {
+  describe( 'isCurrentUrl', function() {
+    var AppCtrl, $location, $scope;
 
-    describe('controller AppController', function () {
-        var AppController, $scope, $location;
+    beforeEach( module( 'ngBoilerplate' ) );
 
-        beforeEach(inject(function ($rootScope, $controller, _$location_) {
-            $scope = $rootScope.$new();
-            $location = _$location_;
-            AppController = $controller('AppController', {
-                $scope: $scope,
-                $location: $location
-            });
-        }));
+    beforeEach( inject( function( $controller, _$location_, $rootScope ) {
+      $location = _$location_;
+      $scope = $rootScope.$new();
+      AppCtrl = $controller( 'AppCtrl', { $location: $location, $scope: $scope });
+    }));
 
-        it('should have `Izeni Ops` as the page title', function() {
-            expect($scope.pageTitle).toBe('Izeni Ops');
-        });
-    });
+    it( 'should pass a dummy test', inject( function() {
+      expect( AppCtrl ).toBeTruthy();
+    }));
+  });
 });
