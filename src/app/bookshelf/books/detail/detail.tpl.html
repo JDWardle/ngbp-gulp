@@ -1,0 +1,44 @@
+<div class="row-fluid" style="margin-top: 10px" ng-if="book">
+  <div class="span3">
+    <img ng-src="{{ book.picture }}" style="height:250px; margin-bottom: 15px; display:block;">
+    <button class="btn btn-primary" ng-if="!checkedOutByCurrentUser && !checkedOut" ng-click="checkOut()">Check Out</button>
+    <button class="btn btn-primary" ng-if="checkedOutByCurrentUser" ng-click="goBackToReading(book)">Read</button>
+    <button class="btn btn-primary" ng-if="checkedOut && canAddIt && book.book_file" ng-click="addToQueue(book)">Add to Reading List</button>
+    <button class="btn btn-primary" disabled ng-if="checkedOut && !canAddIt || !book.book_file">Checked Out</button>
+    <dl>
+      <dt>Author(s):</dt>
+      <dd><p ng-repeat="auth in book.author">{{ auth.name }}</p></dd>
+      <dt>Publisher:</dt>
+      <dd>{{ book.publisher.name }}</dd>
+      <dt ng-if="book.example_code_link">Book Extras:</dt>
+      <dd ng-if="book.example_code_link"><a target="_blank" ng-href="{{ book.example_code_link }}"><p style="word-wrap: break-word">{{ book.example_code_link }}<p></p></a></dd>
+    </dl>
+  </div>
+  <div class="span9">
+    <h2>{{ book.title }}</h2>
+    <div class="row-fluid" ng-if="book.summary">
+      <div class="span12">
+        <h4>Summary</h4>
+        <span ng-if="book.summary" ng-bind-html="book.summary"></span>
+      </div>
+    </div>
+    <span ng-if="book.summary" ng-bind-html="book.summary"></span>
+    <div class="row-fluid" ng-if="book.book_chapters">
+      <div class="span12">
+        <h4>Table of Contents</h4>
+        <ul class="unstyled">
+          <li ng-repeat="chapter in chapters" style="padding:5px; display:block; width:100%;">
+            <strong><a href="" id="{{ chapter.id }}" ng-click="checkOutChapter(chapter)">{{ chapter.chapter_title }}</a></strong>
+            <span class="pull-right"><strong>{{ chapter.page }}</strong></span>
+            <ul ng-if="chapter.sub_chapters" style="list-style:none;">
+              <li ng-repeat="subChapter in chapter.sub_chapters" style="padding:5px; border-bottom:1px solid #dfdfdf;">
+                <a href="" id="{{ subChapter.id }}" ng-click="checkOutChapter(subChapter)">{{ subChapter.chapter_title }}</a>
+                <span class="pull-right" style="margin-right:-5px;">{{ subChapter.page }}</span>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>

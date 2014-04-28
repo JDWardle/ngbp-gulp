@@ -1,0 +1,143 @@
+<div id="pdfStuff" class="control-group" style="margin: 0;">
+  <div id="iframeContainer" ng-class="{true: 'i-frame-container-full-screen', false: 'i-frame-container' }[fullscreenMode]" ng-style="{ 'height': frmHeight }">
+    <iframe id="beholdPDF" name="beholdPDF" seamless width="100%" height="100%" ng-src="{{ book.file }}"></iframe>
+  </div>
+  <div ng-if="loaded" ng-class="{true: 'drag', false: 'short-drag'}[show.relatedMaterial]" ng-mouseleave="determineBehavior($event)" ng-mouseenter="determineBehavior($event)" id="thePartThatAlwaysShows" class="drag" ng-style="{ 'max-height': frmHeight }">
+    <h3><span class="span12">
+      <i class="fa fa-comment" ng-click="toggleStuff()" style="float: left; margin: 2%;" title="Show Comments and Other Material"></i>
+      <i class="fa fa-expand" ng-hide="fullscreenMode" style="float: left; margin: 2%;" ng-click="goFullScreen()" title="Go Full Screen"></i>
+      <i class="fa fa-compress" ng-show="fullscreenMode" style="float: left; margin: 2%;" ng-click="exitFullScreen()" title="Exit Full Screen"></i>
+      <span id="thePartToDrag" draggable state="{{ showStuff }}" drag-contents="thePartThatAlwaysShows" set-height="thePartThatSlides">
+        <i class="fa fa-arrows" style="float: right; margin: 2%" title="Drag"></i>
+      </span>
+      </span>
+    </h3>
+    <div id="thePartThatSlides" ng-show="showStuff" ng-style="{ 'max-height': textboxHeight }" style="width: 100%; overflow: hidden; overflow-y: auto; padding-right: 5px">
+      <div class="span12" style="color:#4a777a; margin: 0">
+        <strong>Rating</strong>
+          <span>
+            <rating value="rating.value" max="rating.max" on-hover="ratingHover(value)" on-leave="rating.overStar = null" ng-click="setRating(rating.value)"></rating>
+          </span>
+      </div>
+      <div class="span12" style="color:#4a777a; margin: 0">
+        <strong>Recommend Book</strong>
+        <i class="fa fa-thumbs-o-up" ng-if="!viewing.recommend_this" ng-click="recommendBook()" title="Recommend This Book"></i>
+        <i class="fa fa-thumbs-up" ng-if="viewing.recommend_this" title="Already Recommended"></i>
+      </div>
+      <div class="span12" style="margin: 0; padding: 0">
+        <h5 ng-click="toggleContent('notes')" class="span9" style="margin: 0;">
+          <i ng-if="!show['notes']" class="fa fa-angle-right"></i>
+          <i ng-if="show['notes']" class="fa fa-angle-down"></i>
+          Notes
+        </h5>
+      <span class="span3">
+      <button ng-show="show['notes']" style="width: 100%" ng-disabled="notesForm.$pristine" class="btn btn-small" ng-click="saveNotes(notesForm)">Save</button>
+        </span>
+      </div>
+      <ng-form name="notesForm" ng-show="show['notes']">
+        <textarea id="notes" ng-model="viewing.personal_notes" ng-style="{ 'max-height': textboxHeight }" style="box-sizing: border-box; -moz-box-sizing: border-box; width: 100%; resize: vertical;"></textarea>
+      </ng-form>
+      <div id="chapterRelated" ng-if="chapters">
+        <small>Show content by:</small>
+        <form class="form-inline" style="margin: 0">
+          <label class="control-label" for="radio1"><small>Entire Book</small></label>
+          <input type="radio" style="margin: 0;" id="radio1" name="selectDisplay" ng-model="contentDisplay" ng-change="displayByAll()" value="all">
+          <label class="control-label" for="radio2"><small>Chapters</small></label>
+          <input type="radio" style="margin: 0;" id="radio2" name="selectDisplay" ng-model="contentDisplay" ng-change="displayByMain()" value="main">
+          <label class="control-label" for="radio3"><small>Subchapters</small></label>
+          <input type="radio" style="margin: 0;" id="radio3" name="selectDisplay" ng-model="contentDisplay" ng-change="displayBySub()" value="sub">
+        </form>
+        <div class="span12" style="margin: 0; padding: 0;">
+          <h5 style="display: inline-block; margin: 0;" ng-click="toggleContent('comments')">
+            <i ng-if="!show['comments']" class="fa fa-angle-right"></i>
+            <i ng-if="show['comments']" class="fa fa-angle-down"></i>
+            Comments
+          </h5>
+          <i class="fa fa-plus" style="color:#4a777a;" ng-click="addComment()"></i>
+          <div ng-if="show['comments']">
+            <div ng-if="show['addComment']">
+              <ng-form name="commentForm">
+                <label for="subject">
+                </label>
+                <input id="subject" type="text" class="input" ng-model="comment.subject" style="font-size: 80%; box-sizing: border-box; -moz-box-sizing: border-box; width: 100%;" placeholder="Subject">
+                <label for="commentBody">
+                </label>
+                <textarea id="commentBody" placeholder="Comment" ng-model="comment.body" required style="box-sizing: border-box; -moz-box-sizing: border-box; width: 100%; resize: vertical;"></textarea>
+              </ng-form>
+              <button class="btn btn-small" ng-if="!show['editComment']" style="width: 100%" ng-disabled="commentForm.$pristine || commentForm.$invalid" ng-click="saveComment(commentForm)">Post Comment</button>
+              <button class="btn btn-small" ng-if="show['editComment']" style="width: 100%" ng-disabled="commentForm.$pristine || commentForm.$invalid" ng-click="updateComment(commentForm)">Update Comment</button>
+            </div>
+            <div ng-repeat="comment in currentChapter.comments">
+              <blockquote style="margin: 0;">
+                <span class="span8" style="font-size: 80%; min-height: 80%; margin-top: 0 ">{{ comment.subject }}</span>
+                <span class="span4" style="font-size: 80%; min-height: 80%; text-align: right" ng-if="user.employee.id == comment.employee.id">
+                  <a href="" ng-click="editComment(comment)">edit</a> | <a href="" ng-click="deleteComment(comment)">delete</a>
+                </span>
+                <p class="span12" style="font-size: 100%">{{ comment.body }}</p>
+                <small class="span12">{{ comment.employee.first_name }} {{ comment.employee.last_name }} {{ comment.date_created | date:'medium'}}</small>
+              </blockquote>
+            </div>
+          </div>
+        </div>
+        <div class="span12" style="margin: 0; padding: 0;">
+          <h5 style="display: inline-block; margin: 0;" ng-click="toggleContent('relatedVideos')">
+            <i ng-if="!show['relatedVideos']" class="fa fa-angle-right"></i>
+            <i ng-if="show['relatedVideos']" class="fa fa-angle-down"></i>
+            Related Videos
+          </h5>
+          <i class="fa fa-plus" style="color:#4a777a;" ng-click="addRelatedVideo()"></i>
+          <div ng-if="show['relatedVideos']">
+            <ul style="list-style:none; padding: 0; margin: 0">
+              <li ng-repeat="related in currentChapter.related_video">
+                <dl style="padding:0; margin:0;">
+                  <dt>
+                    <a href="#/bookshelf/video/{{ related.video_segment.video_section.video }}?segment={{ related.video_segment.id }}">
+                      {{ related.video_segment.title }}
+                    </a>
+                  </dt>
+                  <dd>{{ related.note }}</dd>
+                </dl>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="span12" style="margin: 0; padding: 0;">
+          <h5 style="display: inline-block; margin: 0;" ng-click="toggleContent('relatedChapters')">
+            <i ng-if="!show['relatedChapters']" class="fa fa-angle-right"></i>
+            <i ng-if="show['relatedChapters']" class="fa fa-angle-down"></i>
+            Related Book Chapters
+          </h5>
+          <i class="fa fa-plus" style="color:#4a777a;" ng-click="addRelatedChapter()"></i>
+          <div ng-if="show['relatedChapters']">
+            <ul style="list-style:none; padding: 0; margin: 0">
+              <li ng-repeat="related in currentChapter.relevant_book_chapter">
+                <dl style="padding:0; margin:0;">
+                  <dt><a href="#/bookshelf/book/{{ related.relevant_book_chapter.book }}?chapter={{ related.relevant_book_chapter.id }}">{{ related.relevant_book_chapter.chapter_title }}</a></dt>
+                  <dd>{{ related.relevant_book_chapter.note }}</dd>
+                </dl>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="span12" style="margin: 0; padding: 0;">
+          <h5 style="display: inline-block; margin: 0;" ng-click="toggleContent('externalSources')">
+            <i ng-if="!show['externalSources']" class="fa fa-angle-right"></i>
+            <i ng-if="show['externalSources']" class="fa fa-angle-down"></i>
+            External Resources
+          </h5>
+          <i class="fa fa-plus" style="color:#4a777a;" ng-click="addExternalResource()"></i>
+          <div ng-if="show['externalSources']">
+            <ul style="list-style: none; padding: 0; margin: 0">
+              <li ng-repeat="external in currentChapter.external_source">
+                <dl style="padding:0; margin:0;">
+                  <dt><a href="{{ external.external_source.link }}" title="By: {{ external.external_source.by }}" target="_blank">{{ external.external_source.title }}</a></dt>
+                  <dd>{{ external.external_source.summary }}</dd>
+                </dl>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

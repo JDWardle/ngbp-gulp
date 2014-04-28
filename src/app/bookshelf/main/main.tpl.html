@@ -1,0 +1,61 @@
+<div class="row-fluid">
+  <div class="span6">
+    <h4>Newest Videos</h4>
+    <table class="table table-condensed table-striped" style="text-align: left;">
+      <thead>
+        <tr>
+          <th></th>
+          <th style="text-align:center;">Title</th>
+          <th style="text-align:center;">Date Updated</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr ng-repeat="video in videos">
+          <td class="span2" style="text-align:center; vertical-align:middle;">
+            <img ng-src="{{ urls.media }}{{ video.picture }}" style="height:150px;" class="img-responsive">
+          </td>
+          <td>
+            <dl style="padding:0; margin:0;">
+              <dt>
+                <a href="#/bookshelf/video/{{ video.id }}">{{ video.title }}</a>
+              </dt>
+              <dd ng-if="video.subtitle">{{ video.subtitle }}</dd>
+            </dl>
+          </td>
+          <td style="text-align:center;" class="span2">
+            {{ video.update_date | date:medium }}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="span6">
+    <h4>Newest Books</h4>
+    <table class="table table-condensed table-striped" style="text-align: left;">
+      <thead>
+        <tr>
+          <th></th>
+          <th style="text-align:center;">Title</th>
+          <th style="text-align:center;">Date Updated</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr ng-repeat="book in books | orderBy:'-update_date' | limitTo:5">
+          <td class="span2" style="text-align:center; vertical-align:middle;">
+            <img ng-src="{{ urls.media }}{{ book.picture }}" style="height:150px;" class="img-responsive">
+          </td>
+          <td>
+            <dl style="padding:0; margin:0;">
+              <dt>
+                <a href="#/bookshelf/book/{{ book.slug }}">{{ book.title }}</a>
+              </dt>
+            </dl>
+          </td>
+          <td style="text-align:center;" class="span2">
+            {{ book.update_date | date:medium }}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

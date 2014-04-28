@@ -1,0 +1,50 @@
+<div class="row-fluid">
+  <div class="span3">
+    <img ng-src="{{ urls.media }}{{ video.picture }}" style="height:250px; margin:0 auto; display:block;">
+    <ul class="nav nav-tabs nav-stacked" style="margin-top:5px;">
+      <li ng-repeat="section in video.video_sections"><a href="" ng-click="scrollTo(section.section_order)">{{ section.title }}</a></li>
+    </ul>
+  </div>
+  <div class="span9">
+    <dl>
+      <dt>
+        <h4>{{ video.title }}</h4>
+      </dt>
+      <dd ng-if="video.subtitle">{{ video.subtitle }}</dd>
+      <dt>Publisher</dt>
+      <dd>{{ video.publisher }}</dd>
+    </dl>
+    <table class="table table-striped table-bordered table-condensed" ng-repeat="section in video.video_sections | orderBy:'section_order'">
+      <caption>
+        <a href="" id="{{ section.section_order }}" ng-click="section.expand = !section.expand"><strong>{{ section.title }}</strong></a>
+        <p ng-if="section.expand && section.summary">{{ section.summary }}</p>
+      </caption>
+      <thead>
+        <tr>
+          <th>Video Title</th>
+          <th style="text-align:center;">Length</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr ng-repeat="segment in section.video_segments | orderBy:'segment_order'">
+          <td style="vertical-align:middle;">
+            <dl style="padding:0; margin:0;">
+              <dt><a href="" id="{{ segment.id }}" ng-click="segment.expand = !segment.expand">{{ segment.title }}</a></dt>
+              <dd ng-if="segment.expand"><small>{{ segment.summary }}</small></dd>
+            </dl>
+          </td>
+          <td style="text-align:center; vertical-align:middle;" class="span2">
+            {{ segment.video_length }}
+          </td>
+          <td style="text-align:center; vertical-align:middle;" class="span2">
+            <button class="btn btn-primary" ng-if="!segment.checked_out" ng-click="checkOut(segment, true)">Checkout</button>
+            <button class="btn btn-success" ng-if="segment.checkedOutByCurrentUser" ng-click="checkOut(segment, false)">Watch</button>
+            <button class="btn btn-primary" ng-if="segment.checked_out && !segment.checkedOutByCurrentUser && !segment.queuedByCurrentUser" ng-click="queueSegment(segment)">Queue</button>
+            <button class="btn btn-primary disabled" ng-if="segment.checked_out && !segment.checkedOutByCurrentUser && segment.queuedByCurrentUser">Unavailable</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

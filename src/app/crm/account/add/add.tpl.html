@@ -1,0 +1,107 @@
+<div class="row-fluid">
+  <div class="span12">
+    <h3>Add Account</h3>
+    <div class="row-fluid">
+      <div>
+        <ng-form name="accountForm" class="form-horizontal">
+          <div class="control-group">
+            <label class="control-label" for="company_name">
+              Company Name
+            </label>
+            <div class="controls">
+              <input type="text" ng-model="account.company_name" id="company_name" required>
+            </div>
+          </div>
+          <fieldset>
+            <legend>Optional</legend>
+            <div class="control-group">
+              <label class="control-label" for="company_website">
+                Company Website
+              </label>
+              <div class="controls">
+                <input type="text" ng-model="account.website" id="company_website" placeholder="http://example.com">
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label" for="street_address">
+                Street Address
+              </label>
+              <div class="controls">
+                <input type="text" ng-model="account.street_address" id="street_address">
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label" for="city">
+                City
+              </label>
+              <div class="controls">
+                <input type="text" ng-model="account.city" id="city">
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label" for="state">
+                State
+              </label>
+              <div class="controls">
+                <input type="text" ng-model="account.state" id="state">
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label" for="zip_code">
+                Zip Code
+              </label>
+              <div class="controls">
+                <input type="text" ng-model="account.zip_code" id="zip_code">
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label" for="communication_level">
+                Communication Level
+              </label>
+              <div class="controls">
+                <select ng-model="account.status.communication_level" ng-options="c[0] as c[1] for c in statusChoices" id="communication_level">
+                  <option selected value="">Communication Level</option>
+                </select>
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label" for="share_level">
+                Share Level
+              </label>
+              <div class="controls">
+                <select ng-model="account.status.share_level" ng-options="c[0] as c[1] for c in statusChoices" id="share_level">
+                  <option selected value="">Share Level</option>
+                </select>
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label" for="courtesy_level">
+                Courtesy Level
+              </label>
+              <div class="controls">
+                <select ng-model="account.status.courtesy_level" ng-options="c[0] as c[1] for c in statusChoices" id="courtesy_level">
+                  <option selected value="">Courtesy Level</option>
+                </select>
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label" for="priority">
+                Priority Level
+              </label>
+              <div class="controls">
+                <select ng-model="account.status.priority" ng-options="c[0] as c[1] for c in statusChoices" id="priority">
+                  <option selected value="">Priority Level</option>
+                </select>
+              </div>
+            </div>
+            <div class="control-group">
+              <div class="controls">
+                <button class="btn btn-primary" ng-click="addAccount(account)" ng-disabled="!accountForm.$valid || accountForm.$pristine">Save</button>
+              </div>
+            </div>
+          </fieldset>
+        </ng-form>
+      </div>
+    </div>
+  </div>
+</div>

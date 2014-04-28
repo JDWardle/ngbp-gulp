@@ -1,0 +1,30 @@
+<h2>Add Document</h2>
+<div class="row-fluid">
+  <div class="span12">
+    <ng-form name="addDocumentForm" class="form-horizontal">
+      <div class="control-group">
+        <label class="control-label" for="document.name">Name</label>
+        <div class="controls">
+          <input type="text" id="document.name" ng-model="document.name" placeholder="Document Name" required>
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label" for="document.document">Document</label>
+        <div class="controls">
+          <input type="file" ng-model="uploadDocument" id="document.document" file-upload required>
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label" for="document.description">Description</label>
+        <div class="controls">
+          <textarea id="document.description" ng-model="document.description" placeholder="Description of the document"></textarea>
+        </div>
+      </div>
+      <div class="control-group">
+        <div class="controls">
+          <button type="submit" class="btn btn-primary" ng-disabled="!addDocumentForm.$valid || addDocumentForm.$pristine" ng-click="addDocument()">Add</button>
+        </div>
+      </div>
+    </ng-form>
+  </div>
+</div>
