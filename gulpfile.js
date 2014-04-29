@@ -1,5 +1,5 @@
 var gulp = require('gulp');
-var glob = require('glob');
+var globs = require('globs');
 
 // Include gulp plugins.
 var clean = require('gulp-clean');  // Clean directories.
@@ -172,7 +172,7 @@ gulp.task('index', function () {
      */
     var scripts = [];
 
-    var appJs = glob.sync('**/*.js', {
+    var appJs = globs.sync(['**/*.js', '!vendor/**/*.js'], {
         cwd: config.buildDir,
         nosort: true
     });
