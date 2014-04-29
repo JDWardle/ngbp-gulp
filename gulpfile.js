@@ -11,7 +11,6 @@ var uglify = require('gulp-uglify');
 var rename = require('gulp-rename');
 var less = require('gulp-less');
 var minifyCSS = require('gulp-minify-css');
-// var templateCache = require('gulp-angular-templatecache');
 var html2js = require('gulp-html2js');
 // var template = require('gulp-template');
 // var karma = require('gulp-karma');
@@ -122,7 +121,7 @@ gulp.task('uglifyCSS', ['less'], function () {
     return gulp.src(config.buildDir + '/main.css')
         .pipe(gulp.dest(config.compileDir))
         .pipe(rename('main.min.css'))
-        // .pipe(minifyCSS()) TODO: Uncomment this once gulp-minify-css is fixed.
+        .pipe(minifyCSS())
         .pipe(gulp.dest(config.compileDir));
 });
 
