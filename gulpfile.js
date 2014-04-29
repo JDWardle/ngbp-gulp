@@ -1,5 +1,5 @@
 var gulp = require('gulp');
-// var glob = require('glob');
+var glob = require('glob');
 
 // Include gulp plugins.
 var clean = require('gulp-clean');  // Clean directories.
@@ -12,9 +12,9 @@ var rename = require('gulp-rename');
 var less = require('gulp-less');
 var minifyCSS = require('gulp-minify-css');
 var html2js = require('gulp-html2js');
-// var template = require('gulp-template');
 // var karma = require('gulp-karma');
-// var runSequence = require('run-sequence');
+var template = require('gulp-template');
+var runSequence = require('run-sequence');
 
 var using = require('gulp-using');
 
@@ -150,11 +150,71 @@ gulp.task('watch', function () {
     gulp.watch(config.appFiles.cs, ['cs-lint', 'coffee']);
     gulp.watch(config.appFiles.appTpl, ['html2js']);
     gulp.watch(config.appFiles.less, ['less']);
+    gulp.watch(config.appFiles.index, ['index']);
 });
 
-gulp.task('build', ['clean', 'lint', 'cs-lint', 'coffee', 'copyJs', 'html2js', 'less', 'watch']);
+gulp.task('test', function () {
+    /**
+     * Run all of the apps tests files.
+     */
+    var testFiles = [];
+    testFiles = testFiles.concat(config.appFiles.js);
+    testFiles = testFiles.concat(config.testFiles);
+    return gulp.src(testFiles)
+        .pipe(using());
+});
 
-gulp.task('compile', ['concat', 'uglify', 'uglifyCSS']);
+gulp.task('index', function () {
+    /**
+     * Build the index.html template.
+     *
+     * TODO: Make this process automated.
+     */
+    var scripts = [];
+
+    var appJs = glob.sync('**/*.js', {
+        cwd: config.buildDir,
+        nosort: true
+    });
+
+    scripts = scripts.concat(appJs);
+
+    return gulp.src(config.appFiles.index)
+        .pipe(template({
+            scripts: scripts,
+            styles: ['main.css']
+        }))
+        .pipe(gulp.dest(config.buildDir));
+});
+
+gulp.task('compile-index', function () {
+    /**
+     * Compile the index.html template.
+     */
+    return gulp.src(config.appFiles.index)
+        .pipe(template({
+            scripts: ['app.min.js'],
+            styles: ['main.min.css']
+        }))
+        .pipe(gulp.dest(config.compileDir));
+});
+
+gulp.task('build', function (callback) {
+    runSequence('clean', [
+        'lint', 'cs-lint', 'coffee', 'copyJs', 'html2js', 'less',
+        'watch'],
+        'index',
+        callback
+    );
+});
+
+gulp.task('compile', function (callback) {
+    runSequence([
+        'concat', 'uglify', 'uglifyCSS'],
+        'compile-index',
+        callback
+    );
+});
 
 gulp.task('default', ['build', 'compile']);
 

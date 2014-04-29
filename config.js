@@ -32,7 +32,13 @@ module.exports = {
 
         // Get all of the .less files in src/ and it's subdirectories.
         // Should ignore files that are included by other .less files.
-        less: ['src/**/*.less']
+        less: ['src/**/*.less', '!src/less/variables.less']
+    },
+
+    testFiles: {
+        js: [
+            'bower_components/angular-mocks/angular-mocks.js'
+        ]
     },
 
     vendorFiles: {
