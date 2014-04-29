@@ -199,11 +199,27 @@ gulp.task('compile-index', function () {
         .pipe(gulp.dest(config.compileDir));
 });
 
+gulp.task('build-vendor', function () {
+    /**
+     * TODO: Make this part of the build-index process.
+     */
+    return gulp.src('bower_components/**/*')
+        .pipe(gulp.dest(config.buildDir + '/vendor'));
+});
+
+gulp.task('compile-vendor', function () {
+    /**
+     * TODO: Make this part of the compile-index process.
+     */
+    return gulp.src('bower_components/**/*')
+        .pipe(gulp.dest(config.compileDir + '/vendor'));
+});
+
 gulp.task('build', function (callback) {
     runSequence('clean', [
-        'lint', 'cs-lint', 'coffee', 'copyJs', 'html2js', 'less',
-        'watch'],
+        'lint', 'cs-lint', 'coffee', 'copyJs', 'html2js', 'less', 'watch'],
         'index',
+        'build-vendor',
         callback
     );
 });
@@ -212,6 +228,7 @@ gulp.task('compile', function (callback) {
     runSequence([
         'concat', 'uglify', 'uglifyCSS'],
         'compile-index',
+        'compile-vendor',
         callback
     );
 });
