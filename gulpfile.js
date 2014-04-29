@@ -6,9 +6,9 @@ var clean = require('gulp-clean');  // Clean directories.
 var jshint = require('gulp-jshint'); // Lint .js files.
 var coffee = require('gulp-coffee'); // Lint .coffee files.
 var coffeelint = require('gulp-coffeelint'); // Compile .coffee files.
-// var stylish = require('jshint-stylish');
-// var concat = require('gulp-concat');
-// var uglify = require('gulp-uglify');
+var concat = require('gulp-concat');
+var uglify = require('gulp-uglify');
+var rename = require('gulp-rename');
 // var less = require('gulp-less');
 // var templateCache = require('gulp-angular-templatecache');
 // var template = require('gulp-template');
@@ -23,6 +23,10 @@ var config = require('./config.js');
 
 // Clean build and compile directories.
 gulp.task('clean', function () {
+    /**
+     * Clean the build and compile directories without reading the files which
+     * saves time.
+     */
     return gulp.src([config.buildDir, config.compileDir], {read: false})
         .pipe(clean());
 });
@@ -36,7 +40,7 @@ gulp.task('lint', function () {
      */
     return gulp.src(config.appFiles.js)
         .pipe(jshint())
-        .pipe(jshint.reporter('jshint-stylish')) // Use jshint-stylish because it's pretty.
+        .pipe(jshint.reporter('jshint-stylish'))
         .pipe(jshint.reporter('fail'));
 });
 
@@ -50,9 +54,11 @@ gulp.task('cs-lint', function () {
         .pipe(coffeelint.reporter('fail'));
 });
 
-gulp.task('coffee', function () {
+gulp.task('coffee', ['cs-lint'], function () {
     /**
      * Compile .coffee files and move them into the build directory.
+     *
+     * Runs once the CoffeeScript has been linted.
      */
     return gulp.src(config.appFiles.cs)
         .pipe(coffee({bare: true}).on('error', function (err) {
@@ -63,7 +69,37 @@ gulp.task('coffee', function () {
         .pipe(gulp.dest(config.buildDir));
 });
 
-gulp.task('default', ['lint', 'cs-lint', 'coffee']);
+gulp.task('copyJs', ['lint', 'coffee'], function () {
+    /**
+     * Copy all of the app .js files into the build directory.
+     */
+    return gulp.src(config.appFiles.js)
+        .pipe(gulp.dest(config.buildDir));
+});
+
+gulp.task('concat', ['copyJs'], function () {
+    /**
+     * Concatenate all of the .js files into one file.
+     *
+     * Runs once the JavaScript has been linted and the CoffeeScript has been
+     * compiled.
+     */
+    return gulp.src(config.buildDir + '/app/**/*.js')
+        .pipe(concat('app.js'))
+        .pipe(gulp.dest(config.compileDir));
+});
+
+gulp.task('uglify', ['concat'], function () {
+    /**
+     * Minify the app.js file into the app.min.js file.
+     */
+    return gulp.src(config.compileDir + '/app.js')
+        .pipe(rename('app.min.js'))
+        .pipe(uglify())
+        .pipe(gulp.dest(config.compileDir));
+});
+
+gulp.task('default', ['clean', 'lint', 'cs-lint', 'coffee', 'copyJs', 'concat', 'uglify']);
 
 // // Copy all .js files maintaining relative path.
 // gulp.task('build-js', ['build-less'], function () {
