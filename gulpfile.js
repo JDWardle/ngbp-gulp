@@ -12,6 +12,7 @@ var rename = require('gulp-rename');
 var less = require('gulp-less');
 var minifyCSS = require('gulp-minify-css');
 // var templateCache = require('gulp-angular-templatecache');
+var html2js = require('gulp-html2js');
 // var template = require('gulp-template');
 // var karma = require('gulp-karma');
 // var runSequence = require('run-sequence');
@@ -77,7 +78,7 @@ gulp.task('copyJs', ['lint', 'coffee'], function () {
         .pipe(gulp.dest(config.buildDir));
 });
 
-gulp.task('concat', ['copyJs'], function () {
+gulp.task('concat', ['copyJs', 'html2js'], function () {
     /**
      * Concatenate all of the .js files into one file.
      *
@@ -120,13 +121,28 @@ gulp.task('uglifyCSS', ['less'], function () {
      */
     return gulp.src(config.buildDir + '/main.css')
         .pipe(gulp.dest(config.compileDir))
-        .pipe(using())
         .pipe(rename('main.min.css'))
         // .pipe(minifyCSS()) TODO: Uncomment this once gulp-minify-css is fixed.
         .pipe(gulp.dest(config.compileDir));
 });
 
-gulp.task('default', ['clean', 'lint', 'cs-lint', 'coffee', 'copyJs', 'concat', 'uglify', 'less', 'uglifyCSS']);
+gulp.task('html2js', function () {
+    /**
+     * Grab all of the .tpl.html files and concatenate them into the template.js
+     * module.
+     */
+    return gulp.src(config.appFiles.appTpl)
+        .pipe(html2js({
+            base: 'src',
+            outputModuleName: 'templates-app',
+            indentString: '    ',
+            useStrict: true
+        }))
+        .pipe(concat('templates-app.js'))
+        .pipe(gulp.dest(config.buildDir));
+});
+
+gulp.task('default', ['clean', 'lint', 'cs-lint', 'coffee', 'copyJs', 'html2js', 'concat', 'uglify', 'less', 'uglifyCSS']);
 
 // // Copy all .js files maintaining relative path.
 // gulp.task('build-js', ['build-less'], function () {
