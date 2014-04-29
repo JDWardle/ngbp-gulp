@@ -35,7 +35,7 @@ gulp.task('lint', function () {
      */
     return gulp.src(config.appFiles.js)
         .pipe(jshint())
-        .pipe(jshint.reporter('default')) // Use jshint-stylish because it's pretty.
+        .pipe(jshint.reporter('jshint-stylish')) // Use jshint-stylish because it's pretty.
         .pipe(jshint.reporter('fail'));
 });
 
@@ -44,9 +44,8 @@ gulp.task('cs-lint', function () {
      * Lint all .coffee files in the src/ directory.
      */
     return gulp.src(config.appFiles.cs)
-        .pipe(using())
         .pipe(coffeelint())
-        .pipe(coffeelint.reporter('default')) // Ooooh pretty.
+        .pipe(coffeelint.reporter('default'))
         .pipe(coffeelint.reporter('fail'));
 });
 
