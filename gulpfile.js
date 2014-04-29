@@ -2,9 +2,10 @@ var gulp = require('gulp');
 // var glob = require('glob');
 
 // Include gulp plugins.
-var clean = require('gulp-clean');
-var jshint = require('gulp-jshint');
-var coffeelint = require('gulp-coffeelint');
+var clean = require('gulp-clean');  // Clean directories.
+var jshint = require('gulp-jshint'); // Lint .js files.
+var coffee = require('gulp-coffee'); // Lint .coffee files.
+var coffeelint = require('gulp-coffeelint'); // Compile .coffee files.
 // var stylish = require('jshint-stylish');
 // var concat = require('gulp-concat');
 // var uglify = require('gulp-uglify');
@@ -49,7 +50,20 @@ gulp.task('cs-lint', function () {
         .pipe(coffeelint.reporter('fail'));
 });
 
-gulp.task('default', ['lint', 'cs-lint']);
+gulp.task('coffee', function () {
+    /**
+     * Compile .coffee files and move them into the build directory.
+     */
+    return gulp.src(config.appFiles.cs)
+        .pipe(coffee({bare: true}).on('error', function (err) {
+            // Throw an error here just in case something was able to sneak past
+            // the linter.
+            throw err;
+        }))
+        .pipe(gulp.dest(config.buildDir));
+});
+
+gulp.task('default', ['lint', 'cs-lint', 'coffee']);
 
 // // Copy all .js files maintaining relative path.
 // gulp.task('build-js', ['build-less'], function () {
