@@ -32,7 +32,7 @@ module.exports = {
 
         // Get all of the .less files in src/ and it's subdirectories.
         // Should ignore files that are included by other .less files.
-        less: ['src/**/*.less', '!src/less/variables.less']
+        less: ['src/**/*.less']
     },
 
     vendorFiles: {

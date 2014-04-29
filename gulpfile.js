@@ -9,11 +9,11 @@ var coffeelint = require('gulp-coffeelint'); // Compile .coffee files.
 var concat = require('gulp-concat');
 var uglify = require('gulp-uglify');
 var rename = require('gulp-rename');
-// var less = require('gulp-less');
+var less = require('gulp-less');
+var minifyCSS = require('gulp-minify-css');
 // var templateCache = require('gulp-angular-templatecache');
 // var template = require('gulp-template');
 // var karma = require('gulp-karma');
-// var minifyCSS = require('gulp-minify-css');
 // var runSequence = require('run-sequence');
 
 var using = require('gulp-using');
@@ -99,7 +99,34 @@ gulp.task('uglify', ['concat'], function () {
         .pipe(gulp.dest(config.compileDir));
 });
 
-gulp.task('default', ['clean', 'lint', 'cs-lint', 'coffee', 'copyJs', 'concat', 'uglify']);
+gulp.task('less', ['copyJs'], function () {
+    /**
+     * Concatenates .less files into main.less, compiles it and moves it into
+     * the build directory.
+     */
+    return gulp.src(config.appFiles.less)
+        .pipe(concat('less/main.less'))
+        .pipe(less())
+        .pipe(rename(function (path) {
+            path.dirname = '';
+        }))
+        .pipe(gulp.dest(config.buildDir));
+});
+
+gulp.task('uglifyCSS', ['less'], function () {
+    /**
+     * Copy the main.css file into the compile directory and minify it into the
+     * main.min.css file.
+     */
+    return gulp.src(config.buildDir + '/main.css')
+        .pipe(gulp.dest(config.compileDir))
+        .pipe(using())
+        .pipe(rename('main.min.css'))
+        // .pipe(minifyCSS()) TODO: Uncomment this once gulp-minify-css is fixed.
+        .pipe(gulp.dest(config.compileDir));
+});
+
+gulp.task('default', ['clean', 'lint', 'cs-lint', 'coffee', 'copyJs', 'concat', 'uglify', 'less', 'uglifyCSS']);
 
 // // Copy all .js files maintaining relative path.
 // gulp.task('build-js', ['build-less'], function () {
