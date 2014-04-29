@@ -70,7 +70,7 @@ gulp.task('coffee', ['cs-lint'], function () {
         .pipe(gulp.dest(config.buildDir));
 });
 
-gulp.task('copyJs', ['lint', 'coffee'], function () {
+gulp.task('copyJs', ['lint'], function () {
     /**
      * Copy all of the app .js files into the build directory.
      */
@@ -85,7 +85,7 @@ gulp.task('concat', ['copyJs', 'html2js'], function () {
      * Runs once the JavaScript has been linted and the CoffeeScript has been
      * compiled.
      */
-    return gulp.src(config.buildDir + '/app/**/*.js')
+    return gulp.src(config.buildDir + '/**/*.js')
         .pipe(concat('app.js'))
         .pipe(gulp.dest(config.compileDir));
 });
@@ -100,7 +100,7 @@ gulp.task('uglify', ['concat'], function () {
         .pipe(gulp.dest(config.compileDir));
 });
 
-gulp.task('less', ['copyJs'], function () {
+gulp.task('less', function () {
     /**
      * Concatenates .less files into main.less, compiles it and moves it into
      * the build directory.
@@ -142,7 +142,22 @@ gulp.task('html2js', function () {
         .pipe(gulp.dest(config.buildDir));
 });
 
-gulp.task('default', ['clean', 'lint', 'cs-lint', 'coffee', 'copyJs', 'html2js', 'concat', 'uglify', 'less', 'uglifyCSS']);
+gulp.task('watch', function () {
+    /**
+     * Watch the app files for any changes and perform the necessary actions
+     * when a change does occur.
+     */
+    gulp.watch(config.appFiles.js, ['lint', 'copyJs']);
+    gulp.watch(config.appFiles.cs, ['cs-lint', 'coffee']);
+    gulp.watch(config.appFiles.appTpl, ['html2js']);
+    gulp.watch(config.appFiles.less, ['less']);
+});
+
+gulp.task('build', ['clean', 'lint', 'cs-lint', 'coffee', 'copyJs', 'html2js', 'less', 'watch']);
+
+gulp.task('compile', ['concat', 'uglify', 'uglifyCSS']);
+
+gulp.task('default', ['build', 'compile']);
 
 // // Copy all .js files maintaining relative path.
 // gulp.task('build-js', ['build-less'], function () {
