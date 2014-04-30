@@ -21,6 +21,7 @@ var minifyCSS = require('gulp-minify-css');
 var html2js = require('gulp-html2js');
 var template = require('gulp-template');
 var runSequence = require('run-sequence');
+var recess = require('gulp-recess');
 
 // Include the config file.
 var config = require('./config.js');
@@ -105,9 +106,11 @@ gulp.task('uglify', ['concat'], function () {
 
 gulp.task('less', function () {
     /**
-     * Compiles the main.less file and moves it into the build directory.
+     * Lints the main.less file, compiles it and moves it into the build
+     * directory.
      */
     return gulp.src(config.appFiles.less)
+        .pipe(recess())
         .pipe(less())
         .pipe(gulp.dest(config.buildDir));
 });
@@ -148,7 +151,7 @@ gulp.task('watch', function () {
     gulp.watch(config.appFiles.js, ['lint', 'copyJs']);
     gulp.watch(config.appFiles.cs, ['cs-lint', 'coffee']);
     gulp.watch(config.appFiles.appTpl, ['html2js']);
-    gulp.watch(config.appFiles.less, ['less']);
+    gulp.watch(config.appFiles.delta.less, ['less']);
     gulp.watch(config.appFiles.index, ['index']);
 });
 

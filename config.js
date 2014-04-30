@@ -34,7 +34,11 @@ module.exports = {
 
         // Generally there should only be one .less file and all other files
         // should be imported from this one.
-        less: ['src/less/main.less']
+        less: ['src/less/main.less'],
+
+        delta: {
+            less: ['src/**/*.less']
+        }
     },
 
     testFiles: {
