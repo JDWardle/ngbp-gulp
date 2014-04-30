@@ -111,7 +111,9 @@ gulp.task('less', function () {
      */
     return gulp.src(config.appFiles.less)
         .pipe(recess())
-        .pipe(less())
+        .pipe(less({
+            strictPropertyOrder: false
+        }))
         .pipe(gulp.dest(config.buildDir));
 });
 
