@@ -5,7 +5,6 @@
  *       files? Since some of the vendor files have their own unique way of
  *       including assets we may not be able in order to support everything.
  */
-
 var gulp = require('gulp');
 var globs = require('globs');
 
@@ -189,7 +188,7 @@ gulp.task('index', function () {
 
     styles = styles.concat(vendorCSS);
 
-    // Add main.css to the end of the list.
+    // Add main.css to the end of the styles list.
     styles.push('main.css');
 
     return gulp.src(config.appFiles.index)
@@ -205,8 +204,10 @@ gulp.task('vendorJs', function () {
      * Copy all of the vendor .js files defined in the config into the build
      * directory.
      */
-    return gulp.src(config.vendorFiles.js, {base: './'})
-        .pipe(gulp.dest(config.buildDir));
+    if (config.vendorFiles.js.length) {
+        return gulp.src(config.vendorFiles.js, {base: './'})
+            .pipe(gulp.dest(config.buildDir));
+    }
 });
 
 gulp.task('vendorCSS', function () {
@@ -214,8 +215,10 @@ gulp.task('vendorCSS', function () {
      * Copy all of the vendor .css files defined in the config into the build
      * directory.
      */
-    return gulp.src(config.vendorFiles.css, {base: './'})
-        .pipe(gulp.dest(config.buildDir));
+    if (config.vendorFiles.css.length) {
+        return gulp.src(config.vendorFiles.css, {base: './'})
+            .pipe(gulp.dest(config.buildDir));
+    }
 });
 
 gulp.task('vendorAssets', function () {
@@ -223,15 +226,17 @@ gulp.task('vendorAssets', function () {
      * Copy all of the vendor asset files defined in the config into the build
      * directory.
      */
-    return gulp.src(config.vendorFiles.assets, {base: './'})
-        .pipe(gulp.dest(config.buildDir));
+    if (config.vendorFiles.assets.length) {
+        return gulp.src(config.vendorFiles.assets, {base: './'})
+            .pipe(gulp.dest(config.buildDir));
+    }
 });
 
 gulp.task('build', function (callback) {
     runSequence('clean',
         [
-            'lint', 'cs-lint', 'coffee', 'copyJs', 'html2js', 'less', 'vendorJs',
-            'vendorCSS', 'vendorAssets', 'watch'
+            'lint', 'cs-lint', 'coffee', 'copyJs', 'html2js', 'less',
+            'vendorJs', 'vendorCSS', 'vendorAssets', 'watch'
         ],
         'index',
         callback
@@ -247,4 +252,3 @@ gulp.task('compile', function (callback) {
 });
 
 gulp.task('default', ['build', 'compile']);
-
