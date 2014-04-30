@@ -1,10 +1,3 @@
-/*
- * TODO: Karma test runner, live reload, compile index.html, compile vendor,
- * TODO: common templates, tests for the build process?
- *       Should we combine vendor .js and .css into our main.css and app.js
- *       files? Since some of the vendor files have their own unique way of
- *       including assets we may not be able in order to support everything.
- */
 var gulp = require('gulp');
 var globs = require('globs');
 
@@ -18,10 +11,11 @@ var uglify = require('gulp-uglify');
 var rename = require('gulp-rename');
 var less = require('gulp-less');
 var minifyCSS = require('gulp-minify-css');
-var html2js = require('gulp-html2js');
+var templateCache = require('gulp-angular-templatecache');
 var template = require('gulp-template');
 var runSequence = require('run-sequence');
 var recess = require('gulp-recess');
+var gutil = require('gulp-util');
 
 // Include the config file.
 var config = require('./config.js');
@@ -112,8 +106,14 @@ gulp.task('less', function () {
     return gulp.src(config.appFiles.less)
         .pipe(recess({
             strictPropertyOrder: false
-        }))
-        .pipe(less())
+        })
+            .on('error', function (err) {
+                gutil.log(err);
+            }))
+        .pipe(less()
+            .on('error', function (err) {
+                gutil.log(err);
+            }))
         .pipe(gulp.dest(config.buildDir));
 });
 
@@ -135,11 +135,8 @@ gulp.task('html2js', function () {
      * module.
      */
     return gulp.src(config.appFiles.appTpl)
-        .pipe(html2js({
-            base: 'src',
-            outputModuleName: 'templates-app',
-            indentString: '    ',
-            useStrict: true
+        .pipe(templateCache('templates-app.js', {
+            module: 'app' // TODO: Make this work without using the same module name as the app.
         }))
         .pipe(concat('templates-app.js'))
         .pipe(gulp.dest(config.buildDir));
@@ -182,8 +179,8 @@ gulp.task('index', function () {
     });
 
     scripts = scripts.concat(vendorJs);
-    scripts.push('templates-app.js');
     scripts = scripts.concat(appJs);
+    scripts.push('templates-app.js');
     scripts = scripts.concat(commonJs);
 
     // Grab all of the vendor .css files.
@@ -257,3 +254,4 @@ gulp.task('compile', function (callback) {
 });
 
 gulp.task('default', ['build', 'compile']);
+
