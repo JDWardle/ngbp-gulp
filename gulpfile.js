@@ -1,3 +1,11 @@
+/*
+ * TODO: Karma test runner, live reload, compile index.html, compile vendor,
+ * TODO: common templates, tests for the build process?
+ *       Should we combine vendor .js and .css into our main.css and app.js
+ *       files? Since some of the vendor files have their own unique way of
+ *       including assets we may not be able in order to support everything.
+ */
+
 var gulp = require('gulp');
 var globs = require('globs');
 
@@ -12,11 +20,8 @@ var rename = require('gulp-rename');
 var less = require('gulp-less');
 var minifyCSS = require('gulp-minify-css');
 var html2js = require('gulp-html2js');
-// var karma = require('gulp-karma');
 var template = require('gulp-template');
 var runSequence = require('run-sequence');
-
-var using = require('gulp-using');
 
 // Include the config file.
 var config = require('./config.js');
@@ -101,15 +106,10 @@ gulp.task('uglify', ['concat'], function () {
 
 gulp.task('less', function () {
     /**
-     * Concatenates .less files into main.less, compiles it and moves it into
-     * the build directory.
+     * Compiles the main.less file and moves it into the build directory.
      */
     return gulp.src(config.appFiles.less)
-        .pipe(concat('less/main.less'))
         .pipe(less())
-        .pipe(rename(function (path) {
-            path.dirname = '';
-        }))
         .pipe(gulp.dest(config.buildDir));
 });
 
@@ -121,7 +121,7 @@ gulp.task('uglifyCSS', ['less'], function () {
     return gulp.src(config.buildDir + '/main.css')
         .pipe(gulp.dest(config.compileDir))
         .pipe(rename('main.min.css'))
-        .pipe(minifyCSS())
+//        .pipe(minifyCSS()) // TODO: Uncomment this once the gulp-minify-css package is fixed.
         .pipe(gulp.dest(config.compileDir));
 });
 
@@ -153,234 +153,98 @@ gulp.task('watch', function () {
     gulp.watch(config.appFiles.index, ['index']);
 });
 
-gulp.task('test', function () {
-    /**
-     * Run all of the apps tests files.
-     */
-    var testFiles = [];
-    testFiles = testFiles.concat(config.appFiles.js);
-    testFiles = testFiles.concat(config.testFiles);
-    return gulp.src(testFiles)
-        .pipe(using());
-});
-
 gulp.task('index', function () {
     /**
      * Build the index.html template.
-     *
-     * TODO: Make this process automated.
      */
     var scripts = [];
+    var styles = [];
 
-    var appJs = globs.sync(['**/*.js', '!vendor/**/*.js'], {
+    // Grab all of the vendor .js files.
+    var vendorJs = globs.sync(config.vendorFiles.js, {
+        nosort: true
+    });
+
+    // Grab all of the app .js files.
+    var appJs = globs.sync(['app/**/*.js'], {
         cwd: config.buildDir,
         nosort: true
     });
 
+    // Grab all of the common .js files.
+    var commonJs = globs.sync(['common/**/*.js'], {
+        cwd: config.buildDir,
+        nosort: true
+    });
+
+    scripts = scripts.concat(vendorJs);
+    scripts.push('templates-app.js');
     scripts = scripts.concat(appJs);
+    scripts = scripts.concat(commonJs);
+
+    // Grab all of the vendor .css files.
+    var vendorCSS = globs.sync(config.vendorFiles.css, {
+        nosort: true
+    });
+
+    styles = styles.concat(vendorCSS);
+
+    // Add main.css to the end of the list.
+    styles.push('main.css');
 
     return gulp.src(config.appFiles.index)
         .pipe(template({
             scripts: scripts,
-            styles: ['main.css']
+            styles: styles
         }))
         .pipe(gulp.dest(config.buildDir));
 });
 
-gulp.task('compile-index', function () {
+gulp.task('vendorJs', function () {
     /**
-     * Compile the index.html template.
+     * Copy all of the vendor .js files defined in the config into the build
+     * directory.
      */
-    return gulp.src(config.appFiles.index)
-        .pipe(template({
-            scripts: ['app.min.js'],
-            styles: ['main.min.css']
-        }))
-        .pipe(gulp.dest(config.compileDir));
+    return gulp.src(config.vendorFiles.js, {base: './'})
+        .pipe(gulp.dest(config.buildDir));
 });
 
-gulp.task('build-vendor', function () {
+gulp.task('vendorCSS', function () {
     /**
-     * TODO: Make this part of the build-index process.
+     * Copy all of the vendor .css files defined in the config into the build
+     * directory.
      */
-    return gulp.src('bower_components/**/*')
-        .pipe(gulp.dest(config.buildDir + '/vendor'));
+    return gulp.src(config.vendorFiles.css, {base: './'})
+        .pipe(gulp.dest(config.buildDir));
 });
 
-gulp.task('compile-vendor', function () {
+gulp.task('vendorAssets', function () {
     /**
-     * TODO: Make this part of the compile-index process.
+     * Copy all of the vendor asset files defined in the config into the build
+     * directory.
      */
-    return gulp.src('bower_components/**/*')
-        .pipe(gulp.dest(config.compileDir + '/vendor'));
+    return gulp.src(config.vendorFiles.assets, {base: './'})
+        .pipe(gulp.dest(config.buildDir));
 });
 
 gulp.task('build', function (callback) {
-    runSequence('clean', [
-        'lint', 'cs-lint', 'coffee', 'copyJs', 'html2js', 'less', 'watch'],
+    runSequence('clean',
+        [
+            'lint', 'cs-lint', 'coffee', 'copyJs', 'html2js', 'less', 'vendorJs',
+            'vendorCSS', 'vendorAssets', 'watch'
+        ],
         'index',
-        'build-vendor',
         callback
     );
 });
 
 gulp.task('compile', function (callback) {
-    runSequence([
-        'concat', 'uglify', 'uglifyCSS'],
+    runSequence(
+        ['concat', 'uglify', 'uglifyCSS'],
         'compile-index',
-        'compile-vendor',
         callback
     );
 });
 
 gulp.task('default', ['build', 'compile']);
 
-// // Copy all .js files maintaining relative path.
-// gulp.task('build-js', ['build-less'], function () {
-//     return gulp.src(config.appFiles.js, {base: './'})
-//         .pipe(using())
-//         .pipe(gulp.dest(config.buildDir));
-// });
-
-// // Copy all .less files and compile them while maintaining relative path.
-// gulp.task('build-less', function () {
-//     return gulp.src(config.appFiles.less, {base: './'})
-//         .pipe(less())
-//         .pipe(gulp.dest(config.buildDir));
-// });
-
-// gulp.task('build-vendor-js', function () {
-//     return gulp.src(config.vendorFiles.js, {base: './bower_components'})
-//         .pipe(using())
-//         .pipe(gulp.dest(config.buildDir + '/vendor'));
-// });
-
-// // Concatenate app templates into $templateCache.
-// gulp.task('html2js-app', function () {
-//     return gulp.src(config.appFiles.appTpl)
-//         .pipe(templateCache('templates-app.js', {
-//             module: 'templates-app'
-//         }))
-//         .pipe(gulp.dest(config.buildDir));
-// });
-
-// // Concatenate common templates into $templateCache.
-// gulp.task('html2js-common', function () {
-//     return gulp.src(config.appFiles.commonTpl)
-//         .pipe(templateCache('templates-common.js', {
-//             module: 'templates-common'
-//         }))
-//         .pipe(gulp.dest(config.buildDir));
-// });
-
-// gulp.task('build-index', ['build-js', 'build-less', 'build-vendor-js', 'html2js-app', 'html2js-common'], function () {
-//     var scripts = [];
-
-//     var vendorJs = glob.sync('vendor/**/*.js', {
-//         cwd: config.buildDir,
-//         nosort: true
-//     });
-
-//     var commonJs = glob.sync('src/common/**/*.js', {
-//         cwd: config.buildDir,
-//         nosort: true
-//     });
-
-//     var appJs = glob.sync('src/app/**/*.js', {
-//         cwd: config.buildDir,
-//         nosort: true
-//     });
-
-//     var rootJs = glob.sync('*.js', {
-//         cwd: config.buildDir,
-//         nosort: true
-//     });
-
-//     // Add vendor .js files to the scripts.
-//     scripts = scripts.concat(vendorJs);
-
-//     // Add the app .js files to the scripts.
-//     scripts = scripts.concat(appJs);
-
-//     // Add common .js files to the scripts.
-//     scripts = scripts.concat(commonJs);
-
-//     // Add the root .js files to the scripts.
-//     scripts = scripts.concat(rootJs);
-
-//     console.log(scripts);
-
-//     return gulp.src('src/index.html')
-//         .pipe(template({
-//             scripts: scripts,
-//             styles: glob.sync('**/*.css', {
-//                 cwd: config.buildDir,
-//                 nosort: true
-//             }),
-//             version: 'wat'
-//         }))
-//         .pipe(gulp.dest(config.buildDir));
-// });
-
-// // Lint .js files.
-// gulp.task('lint', function () {
-//     return gulp.src(config.appFiles.js)
-//         .pipe(jshint())
-//         .pipe(jshint.reporter('default'));
-// });
-
-// // Concat and compile styles.
-// gulp.task('compile-less', function () {
-//     return gulp.src(config.buildDir + '/**/*.less')
-//         .pipe(concat('main.min.less'))
-//         .pipe(less())
-//         .pipe(minifyCSS())
-//         .pipe(gulp.dest(config.compileDir));
-// });
-
-// // Concatenate & minify js.
-// gulp.task('compile-js', function () {
-//     return gulp.src(config.buildDir + '/**/*.js')
-//         .pipe(concat('app.min.js'))
-//         .pipe(uglify())
-//         .pipe(gulp.dest(config.buildDir));
-// });
-
-// // Compile the index.
-// gulp.task('compile-index', ['compile-uglify', 'compile-less'], function () {
-//     return gulp.src('src/index.html')
-//         .pipe(template({
-//             scripts: ['app.min.js'],
-//             styles: ['main.min.css']
-//         }))
-//         .pipe(gulp.dest(config.compileDir));
-// });
-
-// // Run tests with Karma.
-// gulp.task('karma', function () {
-//     return gulp.src(config.appFiles.jsTest)
-//         .pipe(karma({
-//             configFile: 'karma.config.js',
-//             action: 'run'
-//         }))
-//         .on('error', function (err) {
-//             throw err;
-//         });
-// });
-
-// // Watch files for changes.
-// gulp.task('watch', function () {
-//     gulp.watch(config.appFiles.js, ['lint', 'html2js-app', 'build-js']);
-//     gulp.watch(config.appFiles.less, ['build-less']);
-// });
-
-// gulp.task('build', function (callback) {
-//     runSequence('clean', [
-//         'lint', 'html2js-app', 'html2js-common', 'build-less', 'build-js',
-//         'build-vendor-js', 'build-index', 'watch']
-//     );
-// });
-
-// gulp.task('compile', ['compile-less', 'compile-js', 'compile-index']);
-
-// gulp.task('default', ['build', 'compile']);
