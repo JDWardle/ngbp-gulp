@@ -15,7 +15,6 @@ var templateCache = require('gulp-angular-templatecache');
 var template = require('gulp-template');
 var runSequence = require('run-sequence');
 var recess = require('gulp-recess');
-var gutil = require('gulp-util');
 
 // Include the config file.
 var config = require('./config.js');
@@ -105,15 +104,10 @@ gulp.task('less', function () {
      */
     return gulp.src(config.appFiles.less)
         .pipe(recess({
-            strictPropertyOrder: false
-        })
-            .on('error', function (err) {
-                gutil.log(err);
-            }))
-        .pipe(less()
-            .on('error', function (err) {
-                gutil.log(err);
-            }))
+            strictPropertyOrder: false,
+            noUniversalSelectors: false
+        }))
+        .pipe(less())
         .pipe(gulp.dest(config.buildDir));
 });
 
