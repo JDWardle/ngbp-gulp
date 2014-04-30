@@ -228,11 +228,19 @@ gulp.task('vendorAssets', function () {
     }
 });
 
+gulp.task('appAssets', function () {
+    /**
+     * Copy all of the app asset files into the build directory.
+     */
+    return gulp.src(config.appFiles.assets)
+        .pipe(gulp.dest(config.buildDir + '/assets'));
+});
+
 gulp.task('build', function (callback) {
     runSequence('clean',
         [
             'lint', 'cs-lint', 'coffee', 'copyJs', 'html2js', 'less',
-            'vendorJs', 'vendorCSS', 'vendorAssets', 'watch'
+            'vendorJs', 'vendorCSS', 'vendorAssets', 'appAssets', 'watch'
         ],
         'index',
         callback
