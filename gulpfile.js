@@ -110,10 +110,10 @@ gulp.task('less', function () {
      * directory.
      */
     return gulp.src(config.appFiles.less)
-        .pipe(recess())
-        .pipe(less({
+        .pipe(recess({
             strictPropertyOrder: false
         }))
+        .pipe(less())
         .pipe(gulp.dest(config.buildDir));
 });
 
