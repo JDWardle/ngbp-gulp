@@ -105,7 +105,8 @@ gulp.task('less', function () {
     return gulp.src(config.appFiles.less)
         .pipe(recess({
             strictPropertyOrder: false,
-            noUniversalSelectors: false
+            noUniversalSelectors: false,
+            noOverqualifying: false
         }))
         .pipe(less())
         .pipe(gulp.dest(config.buildDir));
